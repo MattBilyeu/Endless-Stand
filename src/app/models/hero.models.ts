@@ -28,7 +28,6 @@ export class Hero extends Character {
             }, this.messageService.messageDuration)
         }
         this.attack = (character: Character) => {
-            // Check status effects?
             if (Math.floor(Math.random()*100) < character.evasion) {
                 this.sendMessage(`${this.name} swings at ${character.name}, but misses!`);
                 return
@@ -123,12 +122,141 @@ export class Warrior extends Hero {
 export class Knight extends Hero {
     abilityName: string;
     ability: Function;
+    allies!: Character[];
 
     constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
         super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
-        this.abilityName = 'Knight';
+        this.abilityName = 'Fortify';
+        this.gameStateService.heroes.subscribe(heroes => {
+            this.allies = heroes;
+        })
         this.ability = () => {
+            this.allies.forEach(ally => {
+                ally.defense += 15;
+                if (ally.defense >= 100) {
+                    ally.defense = 95
+                }
+            });
+            this.gameStateService.heroes.next(this.allies);
+            this.sendMessage(`${this.name} fortifies all allies, raising their defense!`)
+        }
+    }
+}
 
+export class Ranger extends Hero {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+        this.abilityName = 'Pierce';
+        this.ability = (enemy: Character) => {
+            enemy.defense = 0;
+            this.sendMessage(`${this.name} pierced ${enemy.name}, removing his defenses!`)
+        }
+    }
+}
+
+export class BlackMage extends Hero {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+        this.abilityName = 'Firestorm';
+        this.ability = () => {
+            let findEnemy = () => {
+                if (this.enemies.every(element => element === undefined)) {
+                    return null
+                };
+                let enemyIndex = Math.floor(Math.random()*4);
+                if (this.enemies[enemyIndex]) {
+                    return this.enemies[enemyIndex]
+                } else {
+                    return findEnemy()
+                };
+            }
+            let blastEnemy = () => {
+                const target = findEnemy();
+                if (target) {
+                    target.health -= target.health - this.attackPower;
+                    if (target.health < 0) {
+                        this.killCharacter(target.index);
+                    };
+                    this.sendMessage(`${this.name} blasts ${target.name} for ${this.attackPower}!`);
+                };
+                this.gameStateService.enemies.next(this.enemies);
+            };
+            blastEnemy();
+            let counter = 0;
+            const intervalId = setInterval(() => {
+                blastEnemy();
+                counter++;
+                if (counter >= 4) {
+                    clearInterval(intervalId)
+                }
+            }, 100)
+        }
+    }
+}
+
+export class Shaman extends Hero {
+    abilityName: string;
+    ability: Function;
+    allies!: Character[]
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+        this.gameStateService.heroes.subscribe(allies => {
+            this.allies = allies
+        });
+        this.abilityName = 'Burning Soul';
+        this.ability = () => {
+            this.allies.forEach(ally => ally.attackPower += 15);
+            this.gameStateService.heroes.next(this.allies);
+            this.sendMessage(`${this.name} increases the attack power of all allies!`);
+        }
+    }
+}
+
+export class Ninja extends Hero {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+        this.abilityName = 'Deathstrike';
+        this.ability = (target: Character) => {
+            let roll = Math.floor(Math.random()*100);
+            if (roll > 50) {
+                this.killCharacter(target.index);
+                this.sendMessage(`${this.name} kills ${target.name}!`)
+            } else {
+                this.sendMessage(`${this.name} strikes at ${target.name}, but misses!`)
+            }
+        }
+    }
+}
+
+export class Spiritualist extends Hero {
+    abilityName: string;
+    ability: Function;
+    allies!: Character[];
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+        this.gameStateService.heroes.subscribe(allies => {
+            this.allies = allies
+        });
+        this.abilityName = 'Reflective Soul';
+        this.ability = () => {
+            this.allies.forEach(ally => {
+                if (!ally.statusEffects.includes('Reflect')) {
+                    ally.statusEffects.push('Reflect');
+                };
+            });
+            this.gameStateService.heroes.next(this.allies);
+            this.sendMessage(`${this.name} gives all allies a reflective soul!`)
         }
     }
 }
