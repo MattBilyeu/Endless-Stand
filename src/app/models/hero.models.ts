@@ -9,18 +9,68 @@ import { GameStateService } from "../services/game-state.service";
 
 export class HeroFactory {
     constructor(private messageService: MessageService, private gameStateService: GameStateService) {}
+
+    // Last three stats - attackPower, Defense, Evasion
+
+    createPaladin(index: number) {
+        return new Paladin(index, this.messageService, this.gameStateService, 50, 75, 10)
+    }
+
+    createWhiteMage(index: number) {
+        return new WhiteMage(index, this.messageService, this.gameStateService, 15, 35, 10)
+    }
+
+    createWarrior(index: number) {
+        return new Warrior(index, this.messageService, this.gameStateService, 75, 40, 10)
+    }
+
+    createKnight(index: number) {
+        return new Knight(index, this.messageService, this.gameStateService, 60, 60, 10)
+    }
+
+    createRanger(index: number) {
+        return new Ranger(index, this.messageService, this.gameStateService, 90, 15, 10)
+    }
+
+    createBlackMage(index: number) {
+        return new BlackMage(index, this.messageService, this.gameStateService, 25, 35, 10)
+    }
+
+    createShaman(index: number) {
+        return new Shaman(index, this.messageService, this.gameStateService, 50, 50, 30)
+    }
+
+    createNinja(index: number) {
+        return new Ninja(index, this.messageService, this.gameStateService, 80, 0, 75)
+    }
+
+    createSpiritualist(index: number) {
+        return new Spiritualist(index, this.messageService, this.gameStateService, 50, 35, 10)
+    }
+
+    createBrawler(index: number) {
+        return new Brawler(index, this.messageService, this.gameStateService, 65, 50, 40)
+    }
+
+    createBard(index: number) {
+        return new Bard(index, this.messageService, this.gameStateService, 5, 60, 75)
+    }
+
+    createMachinist(index: number) {
+        return new Machinist(index, this.messageService, this.gameStateService, 60, 75, 10)
+    }
 }
 
 export class Hero extends Character {
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
         this.gameStateService.enemies.subscribe((enemies: Character[]) => {
             this.enemies = enemies;
         });
         this.killCharacter = (index: number) => {
             this.enemies = this.enemies.splice(index, 1);
             this.gameStateService.enemies.next(this.enemies);
-        }
+        };
         this.sendMessage = (message: string) => {
             this.messageService.message.next(message);
             setTimeout(() => {
@@ -40,7 +90,8 @@ export class Hero extends Character {
                 character.health -= damage;
                 this.messageService.message.next(`${this.name} does ${damage} damage to ${character.name}!`)
             }
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -49,12 +100,14 @@ export class Paladin extends Hero {
     ability: Function;
     allies!: Character[];
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Paladin';
+        this.imageUrl = '';
         this.abilityName = 'Bubble';
         this.gameStateService.heroes.subscribe(heroes => {
             this.allies = heroes;
-        })
+        });
         this.ability = () => {
             this.allies.forEach(character => {
                 if (!character.statusEffects.includes('bubble')) {
@@ -63,7 +116,8 @@ export class Paladin extends Hero {
             });
             this.gameStateService.heroes.next(this.allies);
             this.sendMessage('Paladin casts Bubble on all allies!');
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -72,8 +126,10 @@ export class WhiteMage extends Hero {
     ability: Function;
     allies!: Character[];
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'WhiteMage';
+        this.imageUrl = '';
         this.abilityName = 'Heal';
         this.ability = () => {
             this.allies.forEach(character => {
@@ -81,7 +137,8 @@ export class WhiteMage extends Hero {
             });
             this.gameStateService.heroes.next(this.allies);
             this.sendMessage('White Mage heals all allies!');
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -89,8 +146,10 @@ export class Warrior extends Hero {
     abilityName: string;
     ability: Function;
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Warrior';
+        this.imageUrl = '';
         this.abilityName = 'Cleave';
         this.ability = () => {
             const killedEnemyNames: string[] = [];
@@ -115,7 +174,8 @@ export class Warrior extends Hero {
                 this.sendMessage(message);
             }
             this.gameStateService.enemies.next(this.enemies);
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -124,8 +184,10 @@ export class Knight extends Hero {
     ability: Function;
     allies!: Character[];
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Knight';
+        this.imageUrl = '';
         this.abilityName = 'Fortify';
         this.gameStateService.heroes.subscribe(heroes => {
             this.allies = heroes;
@@ -139,7 +201,8 @@ export class Knight extends Hero {
             });
             this.gameStateService.heroes.next(this.allies);
             this.sendMessage(`${this.name} fortifies all allies, raising their defense!`)
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -147,13 +210,16 @@ export class Ranger extends Hero {
     abilityName: string;
     ability: Function;
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Ranger';
+        this.imageUrl = '';
         this.abilityName = 'Pierce';
         this.ability = (enemy: Character) => {
             enemy.defense = 0;
             this.sendMessage(`${this.name} pierced ${enemy.name}, removing his defenses!`)
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -161,8 +227,10 @@ export class BlackMage extends Hero {
     abilityName: string;
     ability: Function;
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'BlackMage';
+        this.imageUrl = '';
         this.abilityName = 'Firestorm';
         this.ability = () => {
             let findEnemy = () => {
@@ -175,7 +243,7 @@ export class BlackMage extends Hero {
                 } else {
                     return findEnemy()
                 };
-            }
+            };
             let blastEnemy = () => {
                 const target = findEnemy();
                 if (target) {
@@ -196,7 +264,8 @@ export class BlackMage extends Hero {
                     clearInterval(intervalId)
                 }
             }, 100)
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -205,8 +274,10 @@ export class Shaman extends Hero {
     ability: Function;
     allies!: Character[]
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Shaman';
+        this.imageUrl = '';
         this.gameStateService.heroes.subscribe(allies => {
             this.allies = allies
         });
@@ -215,7 +286,8 @@ export class Shaman extends Hero {
             this.allies.forEach(ally => ally.attackPower += 15);
             this.gameStateService.heroes.next(this.allies);
             this.sendMessage(`${this.name} increases the attack power of all allies!`);
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -223,8 +295,10 @@ export class Ninja extends Hero {
     abilityName: string;
     ability: Function;
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Ninja';
+        this.imageUrl = '';
         this.abilityName = 'Deathstrike';
         this.ability = (target: Character) => {
             let roll = Math.floor(Math.random()*100);
@@ -234,7 +308,8 @@ export class Ninja extends Hero {
             } else {
                 this.sendMessage(`${this.name} strikes at ${target.name}, but misses!`)
             }
-        }
+        };
+        this.endTurn();
     }
 }
 
@@ -243,8 +318,10 @@ export class Spiritualist extends Hero {
     ability: Function;
     allies!: Character[];
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Spiritualist';
+        this.imageUrl = '';
         this.gameStateService.heroes.subscribe(allies => {
             this.allies = allies
         });
@@ -257,19 +334,89 @@ export class Spiritualist extends Hero {
             });
             this.gameStateService.heroes.next(this.allies);
             this.sendMessage(`${this.name} gives all allies a reflective soul!`)
-        }
+        };
+        this.endTurn();
     }
 }
 
-export class Sample extends Hero {
+export class Brawler extends Hero {
     abilityName: string;
     ability: Function;
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        super(index, messageService, gameStateService, attackPower, defense, evasion, name, imageUrl)
-        this.abilityName = '';
-        this.ability = () => {
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Brawler';
+        this.imageUrl = '';
+        this.abilityName = 'Combination';
+        this.ability = (target: Character) => {
+            let message = `${this.name} attemps a combo and `;
+            let finished = false;
+            let firstAttempt = true;
+            while (!finished) {
+                if (firstAttempt) {
+                    let roll = Math.floor(Math.random()*100);
+                    if (roll < 35) {
+                        message = message + 'fails';
+                        finished = true;
+                    } else {
+                        const damage = Math.floor(this.attackPower*(target.defense/100));
+                        target.health -= damage;
+                        message = message + `does ${damage} to ${target.name}`
+                        firstAttempt = false;
+                    }
+                } else {
+                    let roll = Math.floor(Math.random()*100);
+                    if (roll < 35) {
+                        finished = true;
+                    } else {
+                        const damage = Math.floor(this.attackPower*(target.defense/100));
+                        target.health -= damage;
+                        message = message + `, does ${damage} to ${target.name}`
+                    }
+                }
+            };
+            message = message + '!'
+            if (target.health < 0) {
+                this.killCharacter(target.index);
+            };
+            this.sendMessage(message);
+        };
+        this.endTurn();
+    }
+}
 
-        }
+export class Bard extends Hero {
+    abilityName: string;
+    ability: Function;
+    allies!: Character[];
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Bard';
+        this.imageUrl = '';
+        this.abilityName = 'Inspire';
+        this.gameStateService.heroes.subscribe(allies => this.allies = allies);
+        this.ability = () => {
+            this.allies.forEach(ally => ally.attackPower += 15);
+            this.gameStateService.heroes.next(this.allies);
+            this.sendMessage(`${this.name} sings an inspiring song, boosting ally power!`)
+        };
+        this.endTurn();
+    }
+}
+
+export class Machinist extends Hero {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Machinist';
+        this.imageUrl = '';
+        this.abilityName = 'Construct';
+        this.ability = () => {
+            //Need access to character factory - construct new ally to replace a missing one
+        };
+        this.endTurn();
     }
 }

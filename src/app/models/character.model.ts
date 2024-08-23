@@ -11,8 +11,8 @@ export class CharacterFactory {
 }
 
 export class Character {
-    name: string;
-    imageUrl: string;
+    name!: string;
+    imageUrl!: string;
     health: number;
     attackPower: number;
     defense: number;
@@ -25,10 +25,9 @@ export class Character {
     killCharacter!: Function;
     attack: Function;
     sendMessage: Function;
+    endTurn: Function;
 
-    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number, name: string, imageUrl: string) {
-        this.name = name;
-        this.imageUrl = imageUrl;
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
         this.health = 100;
         this.attackPower = attackPower;
         this.evasion = evasion;
@@ -42,7 +41,7 @@ export class Character {
             setTimeout(() => {
                 this.messageService.message.next(undefined)
             }, this.messageService.messageDuration)
-        }
+        };
         this.attack = (character: Character) => {
             if (Math.floor(Math.random()*100) < character.evasion) {
                 this.sendMessage(`${this.name} swings at ${character.name}, but misses!`);
@@ -56,6 +55,7 @@ export class Character {
                 character.health -= damage;
                 this.messageService.message.next(`${this.name} does ${damage} damage to ${character.name}!`)
             }
-        }
+        };
+        this.endTurn = () => this.gameStateService.endTurn()
     }
 }

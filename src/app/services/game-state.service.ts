@@ -10,4 +10,8 @@ export class GameStateService {
   enemies = new BehaviorSubject<Character[]>([]);
 
   constructor() { }
+
+  endTurn() {
+    
+  }
 }
