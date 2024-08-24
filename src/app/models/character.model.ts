@@ -21,7 +21,7 @@ export class Character {
     statusEffects: string[];
     messageService: MessageService;
     gameStateService: GameStateService;
-    enemies!: Character[];
+    enemies!: (Character | undefined)[];
     killCharacter!: Function;
     attack: Function;
     sendMessage: Function;

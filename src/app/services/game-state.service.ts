@@ -6,8 +6,9 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class GameStateService {
-  heroes = new BehaviorSubject<Character[]>([]);
-  enemies = new BehaviorSubject<Character[]>([]);
+  heroes = new BehaviorSubject<(Character | undefined)[]>([]);
+  enemies = new BehaviorSubject<(Character | undefined)[]>([]);
+  difficulty: number = 1;
 
   constructor() { }
 
