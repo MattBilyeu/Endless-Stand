@@ -252,7 +252,7 @@ export class Skeleton extends Enemy {
 export class Necromancer extends Enemy {
     abilityName: string;
     ability: Function;
-    allies!: Character[];
+    allies!: (Character | undefined)[];
 
     constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
         super(index, messageService, gameStateService, attackPower, defense, evasion)
@@ -261,7 +261,133 @@ export class Necromancer extends Enemy {
         this.imageUrl = '';
         this.abilityName = 'Raise';
         this.ability = () => {
-            
+            if (!this.allies.includes(undefined)) {
+                this.sendMessage(`Necromancer tries to summon skeletons, but there's no room!`)
+            } else {
+                for (let i = 0; i < this.allies.length; i++) {
+                    if (this.allies[i] === undefined) {
+                        this.allies[i] = new Skeleton(i, this.messageService, this.gameStateService, 30, 15, 1);
+                    }
+                };
+                this.gameStateService.enemies.next(this.allies);
+                this.sendMessage(`Necromancer summons skeletons!`)
+            }
+        };
+        this.endTurn();
+    }
+} 
+
+export class Poltergeist extends Enemy {
+    abilityName: string;
+    ability: Function;
+    allies!: (Character | undefined)[];
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.gameStateService.enemies.subscribe(allies => this.allies = allies);
+        this.name = 'Poltergeist';
+        this.imageUrl = '';
+        this.abilityName = 'Possess';
+        this.ability = () => {
+            this.allies[this.index] = undefined;
+            this.gameStateService.enemies.next(this.allies);
+            let attempt = Math.floor(Math.random()*100);
+            let target = findTarget(this.enemies);
+            if (attempt > 50) {
+                if (target) {
+                    this.killCharacter(target.index);
+                    this.sendMessage(`Poltergeist possesses ${target.name}, and drives him mad!`)
+                }
+            } else if (target) {
+                this.sendMessage(`Poltergeist tries to possess ${target.name}, but is resisted!`)
+            }
+        };
+        this.endTurn();
+    }
+} 
+
+export class Cultist extends Enemy {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Cultist';
+        this.imageUrl = '';
+        this.abilityName = 'Sacrifice';
+        this.ability = () => {
+            // Sacrifices all allies, summons fallen angel.
+        };
+        this.endTurn();
+    }
+} 
+
+export class Imp extends Enemy {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Imp';
+        this.imageUrl = '';
+        this.abilityName = 'Trick';
+        this.ability = () => {
+            let target1 = findTarget(this.enemies);
+            let target2 = findTarget(this.enemies);
+            if (target1 && target2) {
+                let damage = Math.floor(target1.attackPower*(target2.defense/100));
+                target2.health -= damage;
+                if (target2.health < 0) {
+                    this.killCharacter(target2.index);
+                };
+                this.sendMessage(`Imp tricks ${target1.name} into attacking ${target2.name} for ${damage} damage!`)
+            };
+            this.gameStateService.heroes.next(this.enemies);
+        };
+        this.endTurn();
+    }
+} 
+
+export class Demon extends Enemy {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Demon';
+        this.imageUrl = '';
+        this.abilityName = 'Cower';
+        this.ability = () => {
+            let roll = Math.floor(Math.random()*101);
+            if (roll > 90) {
+                let target = findTarget(this.enemies);
+                if (target) {
+                    target.attackPower = 1;
+                    target.defense = 1;
+                    this.gameStateService.heroes.next(this.enemies);
+                    this.sendMessage(`Demon intimidates ${target.name}, causing ${target.name} to cower in fear!`)
+                }
+            } else {
+                this.sendMessage(`Demon tries to intimidate the party ... but no one is impressed!`)
+            }
+        };
+        this.endTurn();
+    }
+} 
+
+export class Beholder extends Enemy {
+    abilityName: string;
+    ability: Function;
+
+    constructor(index: number, messageService: MessageService, gameStateService: GameStateService, attackPower: number, defense: number, evasion: number) {
+        super(index, messageService, gameStateService, attackPower, defense, evasion)
+        this.name = 'Beholder';
+        this.imageUrl = '';
+        this.abilityName = 'Glower';
+        this.ability = () => {
+            this.enemies.forEach(enemy => {
+                
+            })
         };
         this.endTurn();
     }
